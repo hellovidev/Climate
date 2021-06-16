@@ -35,6 +35,10 @@ class WeatherViewController: UIViewController  {
         print(searchTextField.text!)
     }
     
+    @IBAction func currentLocationAction(_ sender: UIButton) {
+        locationManager.requestLocation()
+    }
+    
 }
 
 // MARK: - UITextFieldDelegate
@@ -89,7 +93,12 @@ extension WeatherViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
-            print("Location update")
+            if let location = locations.last {
+                manager.stopUpdatingLocation()
+                let lat = location.coordinate.latitude
+                let lon = location.coordinate.longitude
+                weatherManager.fetchWeather(lat: lat, lon:lon)
+            }
         }
     }
     
@@ -98,3 +107,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
     }
     
 }
+
+/*
+ api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
+ */
