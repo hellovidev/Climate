@@ -65,3 +65,65 @@ print(array.map { $0 + 1 })
 
 let newStringArray = array.map { "\($0)" }
 print(newStringArray)
+
+// MARK: - Extensions
+
+// Thats why we can write extension to add functionality to struct or class
+extension Double {
+    func round(to places: Int) -> Double {
+        let precision = pow(10, Double(places))
+        var value = self
+        value *= precision
+        value.round()
+        value /= precision
+        return value
+    }
+}
+
+var myDouble = 3.14159
+
+//myDouble.round()
+
+// But .round(to: 3) Does not exists to make 3.141
+
+let myRoundedDouble =
+//let myRoundedDouble = String(format: "%.1f", myDouble)
+
+// And use it like this
+myDouble.round(to: 2)
+print(myRoundedDouble)
+
+// Practice
+
+let button = UIButton(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+                                    
+button.backgroundColor = .red
+
+extension UIButton {
+    func toCircle() {
+        //self.layer.cornerRadius = 25
+        self.layer.cornerRadius = self.frame.size.width / 2
+        self.clipsToBounds = true
+    }
+}
+
+button.toCircle()
+
+// If you use extensions for protocols you should write implementation of functionality which would be default for all inherit classes (and you can use class without implementation protocol methods because it already have realization) and you can override this protocol method in class
+
+protocol Fly {
+    func fly()
+}
+
+extension Fly {
+    func fly() {
+        print("Object can fly!")
+    }
+}
+
+class Airplane: Fly {
+    // You can use or not protocol function
+}
+
+let airplane = Airplane()
+airplane.fly()

@@ -6,20 +6,27 @@
 //
 
 import UIKit
+import CoreLocation
 
-class WeatherViewController: UIViewController, UITextFieldDelegate {
-    
+class WeatherViewController: UIViewController  {
     @IBOutlet weak var conditionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var searchTextField: UITextField!
     
     private var weatherManager = WeatherManager()
+    private let locationManager = CLLocationManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        // Show pop up which ask user to allow current location
+        /*Well, the reason to write delegate before requests is because we have to set the current class as the delegate to be able to register with
+         the locationManager and to be able to respond when requestLocation actually triggers this method.*/
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
         
+        weatherManager.delegate = self
         searchTextField.delegate = self
     }
 
@@ -28,6 +35,11 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
         print(searchTextField.text!)
     }
     
+}
+
+// MARK: - UITextFieldDelegate
+
+extension WeatherViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Notify when user press return key button
         searchTextField.endEditing(true)
@@ -53,3 +65,36 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     
 }
 
+// MARK: - WeatherManagerDelegate
+
+extension WeatherViewController: WeatherManagerDelegate {
+    func didFailWithError(error: Error) {
+        print(error.localizedDescription)
+    }
+    
+    func didUpdateWeather(weather: WeatherModel) {
+        DispatchQueue.main.async { [weak self] in
+            self?.conditionImageView.image = UIImage(systemName: weather.getConditionName)
+            self?.temperatureLabel.text = weather.temperatureString
+            self?.cityLabel.text = weather.cityName
+        }
+
+    }
+    
+}
+
+// MARK: - CLLocationManagerDelegate
+
+extension WeatherViewController: CLLocationManagerDelegate {
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
+            print("Location update")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
+    
+}
